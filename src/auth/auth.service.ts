@@ -39,7 +39,8 @@ export class AuthService {
         registerCode: generateUUID(),
       });
       return {
-        success: true,
+        statusCode: 200,
+        message: 'Success',
       };
     } catch (err) {
       if (err.code === 11000) {
