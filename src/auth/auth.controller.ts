@@ -26,7 +26,7 @@ export class AuthController {
 
   @Put('/register')
   async register(@Body() { login, email, name, surname }: RegisterUserDto) {
-    return this.authService.register();
+    return this.authService.register(login, email, name, surname);
   }
 
   @Patch('/confirm/:login/:registerCode')
