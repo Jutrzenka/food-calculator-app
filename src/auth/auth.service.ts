@@ -10,6 +10,7 @@ import { Model } from 'mongoose';
 import { UserTokenService } from './authorization-token/user-token.service';
 import { User, UserDocument } from './schema/user.schema';
 import { generateUUID } from '../Utils/function/generateUUID';
+import { encryption } from '../Utils/function/bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -19,20 +20,45 @@ export class AuthService {
     @Inject(forwardRef(() => UserTokenService))
     private tokenService: UserTokenService,
   ) {}
-  async activateFullAccount(
+
+  async activateAccount(
     login: string,
     newLogin: string,
     password: string,
     registerCode: string,
   ) {
-    throw new Error('Method not implemented.');
+    const hashPassword = await encryption(password);
+    if (!hashPassword.status) {
+      throw new Error(hashPassword.error);
+    }
+    const filter = {
+      login,
+      registerCode,
+    };
+    const updateData = {
+      login: newLogin,
+      password: hashPassword.data,
+      registerCode: null,
+      activeAccount: true,
+    };
+    const status = await this.authModel.updateOne(filter, updateData, {
+      new: true,
+    });
+    if (status.modifiedCount === 0) {
+      throw new HttpException('This user is not found', HttpStatus.BAD_REQUEST);
+    }
+    return {
+      statusCode: 200,
+      message: 'Success',
+    };
   }
-  async register(login: string, email: string, name: string, surname: string) {
+
+  async register(email: string, name: string, surname: string) {
     try {
       await this.authModel.create({
         idUser: generateUUID(),
         email: email.toLowerCase().trim(),
-        login: login.trim(),
+        login: email.toLowerCase().trim(),
         name,
         surname,
         activeAccount: false,
@@ -52,9 +78,11 @@ export class AuthService {
       );
     }
   }
+
   async logout() {
     throw new Error('Method not implemented.');
   }
+
   async login() {
     throw new Error('Method not implemented.');
   }

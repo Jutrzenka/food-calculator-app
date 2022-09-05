@@ -25,8 +25,8 @@ export class AuthController {
   }
 
   @Put('/register')
-  async register(@Body() { login, email, name, surname }: RegisterUserDto) {
-    return this.authService.register(login, email, name, surname);
+  async register(@Body() { email, name, surname }: RegisterUserDto) {
+    return this.authService.register(email, name, surname);
   }
 
   @Patch('/confirm/:login/:registerCode')
@@ -35,7 +35,7 @@ export class AuthController {
     @Body()
     { newLogin, password }: ConfirmUserDto,
   ) {
-    return await this.authService.activateFullAccount(
+    return await this.authService.activateAccount(
       login,
       newLogin,
       password,
