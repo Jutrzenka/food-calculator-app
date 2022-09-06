@@ -5,5 +5,6 @@ export class ConfirmUserDto {
   @MinLength(8)
   newLogin: string;
   @IsString()
+  @MinLength(12)
   password: string;
 }

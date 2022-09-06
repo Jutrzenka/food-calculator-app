@@ -1,11 +1,22 @@
-import { Body, Controller, Param, Patch, Post, Put, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { UserObj } from '../Utils/decorator/userobj.decorator';
 import { AuthService } from './auth.service';
 import { User } from './schema/user.schema';
+import { Response } from 'express';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { ConfirmUserDto } from './dto/confirm-user.dto';
 import { ConfirmUserParam } from './dto/confirm-user.param';
+import { JwtUserGuard } from './authorization-token/guard/jwtUser.guard';
 
 @Controller('/auth')
 export class AuthController {
@@ -16,17 +27,18 @@ export class AuthController {
     @Body() { loginOrEmail, password }: LoginUserDto,
     @Res() res: Response,
   ) {
-    await this.authService.login();
+    await this.authService.login(loginOrEmail, password, res);
   }
 
   @Post('/logout')
+  @UseGuards(JwtUserGuard)
   async logout(@UserObj() user: User, @Res() res: Response) {
-    return this.authService.logout();
+    return this.authService.logout(user, res);
   }
 
   @Put('/register')
-  async register(@Body() { login, email, name, surname }: RegisterUserDto) {
-    return this.authService.register(login, email, name, surname);
+  async register(@Body() { email, name, surname }: RegisterUserDto) {
+    return this.authService.register(email, name, surname);
   }
 
   @Patch('/confirm/:login/:registerCode')
@@ -35,7 +47,7 @@ export class AuthController {
     @Body()
     { newLogin, password }: ConfirmUserDto,
   ) {
-    return await this.authService.activateFullAccount(
+    return await this.authService.activateAccount(
       login,
       newLogin,
       password,
