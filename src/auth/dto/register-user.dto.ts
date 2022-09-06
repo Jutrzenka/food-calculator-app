@@ -5,8 +5,6 @@ export class RegisterUserDto {
   @IsEmail()
   email: string;
   @IsString()
-  login: string;
-  @IsString()
   name: string;
   @IsString()
   surname: string;
