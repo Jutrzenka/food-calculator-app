@@ -70,7 +70,10 @@ export class AuthService {
       return generateSuccessResponse();
     } catch (err) {
       if (err.code === 11000) {
-        throw new HttpException('Wrong data', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          'This email or login is existed',
+          HttpStatus.BAD_REQUEST,
+        );
       }
       throw new HttpException(
         'Internal server error',
