@@ -19,7 +19,7 @@ export class UserTokenService {
     expiresIn: number;
   } {
     const payload: JwtPayload = { id: currentTokenId };
-    const expiresIn = 60 * 60 * 24;
+    const expiresIn = 60 * 20;
     const accessToken = sign(payload, configuration().server.secretKey, {
       expiresIn,
     });

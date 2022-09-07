@@ -1,9 +1,10 @@
-import { IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class ConfirmUserParam {
-  @IsString()
-  @MinLength(8)
-  login: string;
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+  @IsNotEmpty()
   @IsString()
   registerCode: string;
 }
