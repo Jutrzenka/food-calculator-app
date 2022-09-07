@@ -9,8 +9,24 @@ export class User extends Document {
   idUser: string;
   @Prop({ required: true, unique: true })
   email: string;
-  @Prop({ required: true, unique: true, minlength: 8 })
-  login: string;
+  @Prop({
+    required: true,
+    min: 0,
+    max: 250,
+    default(): number {
+      return 0;
+    },
+  })
+  productLimit: number;
+  @Prop({
+    required: true,
+    min: 0,
+    max: 100,
+    default(): number {
+      return 0;
+    },
+  })
+  recipeLimit: number;
   @Prop({ required: true })
   name: string;
   @Prop({ required: true })

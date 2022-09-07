@@ -6,37 +6,51 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { JwtUserGuard } from '../auth/authorization-token/guard/jwtUser.guard';
+import { UserObj } from '../Utils/decorator/userobj.decorator';
+import { User } from '../auth/schema/user.schema';
+import { FindAllProductDto } from './dto/findAll-product.dto';
+import { FindOneProductParam } from './dto/findOne-product.param';
 
 @Controller('/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  findAll() {
-    return this.productService.findAll();
+  @UseGuards(JwtUserGuard)
+  findAll(@UserObj() user: User, @Body() { limit, page }: FindAllProductDto) {
+    return this.productService.findAll(user, limit, page);
   }
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @UseGuards(JwtUserGuard)
+  create(@UserObj() user: User) {
+    return this.productService.create(user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  @Get('/:idProduct')
+  @UseGuards(JwtUserGuard)
+  findOne(@UserObj() user: User, @Param() { idProduct }: FindOneProductParam) {
+    return this.productService.findOne(user, idProduct);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+  @Patch('/:idProduct')
+  @UseGuards(JwtUserGuard)
+  update(
+    @UserObj() user: User,
+    @Param() { idProduct }: FindOneProductParam,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
+    return this.productService.update(user, idProduct, updateProductDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  @Delete('/:idProduct')
+  @UseGuards(JwtUserGuard)
+  remove(@UserObj() user: User, @Param() { idProduct }: FindOneProductParam) {
+    return this.productService.remove(user, idProduct);
   }
 }

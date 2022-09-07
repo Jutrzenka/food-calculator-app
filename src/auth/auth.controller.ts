@@ -23,11 +23,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
-  async login(
-    @Body() { loginOrEmail, password }: LoginUserDto,
-    @Res() res: Response,
-  ) {
-    await this.authService.login(loginOrEmail, password, res);
+  async login(@Body() { email, password }: LoginUserDto, @Res() res: Response) {
+    await this.authService.login(email, password, res);
   }
 
   @Post('/logout')
@@ -41,15 +38,13 @@ export class AuthController {
     return this.authService.register(email, name, surname);
   }
 
-  @Patch('/confirm/:login/:registerCode')
+  @Patch('/confirm/:email/:registerCode')
   async confirmAccount(
-    @Param() { login, registerCode }: ConfirmUserParam,
-    @Body()
-    { newLogin, password }: ConfirmUserDto,
+    @Param() { email, registerCode }: ConfirmUserParam,
+    @Body() { password }: ConfirmUserDto,
   ) {
     return await this.authService.activateAccount(
-      login,
-      newLogin,
+      email,
       password,
       registerCode,
     );
