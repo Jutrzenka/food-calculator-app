@@ -12,29 +12,36 @@ export class Product extends Document {
   @Prop({ required: true })
   name: string;
   @Prop({
-    default(): null {
-      return null;
+    required: true,
+    default(): [] {
+      return [];
     },
   })
-  calories: number;
+  relations: Array<string>;
   @Prop({
     default(): null {
       return null;
     },
   })
-  fat: number;
+  calories: number | null;
   @Prop({
     default(): null {
       return null;
     },
   })
-  carbohydrates: number;
+  fat: number | null;
   @Prop({
     default(): null {
       return null;
     },
   })
-  protein: number;
+  carbohydrates: number | null;
+  @Prop({
+    default(): null {
+      return null;
+    },
+  })
+  protein: number | null;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

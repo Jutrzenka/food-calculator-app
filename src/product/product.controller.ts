@@ -38,7 +38,6 @@ export class ProductController {
     return this.productService.findOne(user, idProduct);
   }
 
-  //@TODO Dodać Patch i Delete, a następnie limit produktów na jednego użytkownika. Potem przejść do receptur
   @Patch('/:idProduct')
   @UseGuards(JwtUserGuard)
   update(

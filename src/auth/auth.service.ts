@@ -27,22 +27,16 @@ export class AuthService {
     private tokenService: UserTokenService,
   ) {}
 
-  async activateAccount(
-    login: string,
-    newLogin: string,
-    password: string,
-    registerCode: string,
-  ) {
+  async activateAccount(email: string, password: string, registerCode: string) {
     const hashPassword = await encryption(password);
     if (!hashPassword.status) {
       throw new Error(hashPassword.error);
     }
     const filter = {
-      login,
+      email,
       registerCode,
     };
     const updateData = {
-      login: newLogin,
       password: hashPassword.data,
       registerCode: null,
       activeAccount: true,
@@ -61,7 +55,6 @@ export class AuthService {
       await this.authModel.create({
         idUser: generateUUID(),
         email: email.toLowerCase().trim(),
-        login: email.toLowerCase().trim(),
         name,
         surname,
         activeAccount: false,
@@ -69,6 +62,7 @@ export class AuthService {
       });
       return generateSuccessResponse();
     } catch (err) {
+      console.log(err);
       if (err.code === 11000) {
         throw new HttpException(
           'This email or login is existed',
@@ -102,10 +96,10 @@ export class AuthService {
     }
   }
 
-  async login(loginOrEmail, password, res) {
+  async login(email, password, res) {
     try {
       const user = await this.authModel.findOne({
-        $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
+        email,
       });
       const isUser = await decryption(password, user.password);
       if (!isUser) {
@@ -128,7 +122,7 @@ export class AuthService {
         .json(
           generateElementResponse('object', {
             id: user.idUser,
-            login: user.login,
+            email: user.email,
           }),
         );
     } catch (e) {

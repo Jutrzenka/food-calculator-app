@@ -8,7 +8,7 @@ import {
   generateElementResponse,
   generateSuccessResponse,
 } from '../Utils/function/generateJsonResponse/generateJsonResponse';
-import { User } from '../auth/schema/user.schema';
+import { User, UserDocument } from '../auth/schema/user.schema';
 import { generateUUID } from '../Utils/function/generateUUID';
 
 @Injectable()
@@ -16,21 +16,33 @@ export class ProductService {
   constructor(
     @InjectModel(Product.name)
     private productModel: Model<ProductDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
   ) {}
 
-  async create(user) {
-    try {
-      await this.productModel.create({
-        idUser: user.idUser,
-        idProduct: generateUUID(),
-        name: 'Nowy produkt',
-      });
-      return generateSuccessResponse();
-    } catch (err) {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+  async create({ idUser, productLimit }: User) {
+    if (productLimit < 250) {
+      try {
+        await this.productModel.create({
+          idUser,
+          idProduct: generateUUID(),
+          name: 'Nowy produkt',
+        });
+        await this.userModel.findOneAndUpdate(
+          {
+            idUser,
+          },
+          { productLimit: productLimit + 1 },
+        );
+        return generateSuccessResponse();
+      } catch (err) {
+        throw new HttpException(
+          'Internal server error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    } else {
+      throw new HttpException('Too many product', HttpStatus.CONFLICT);
     }
   }
 
@@ -66,7 +78,13 @@ export class ProductService {
   async findOne(user: User, idProduct: string) {
     try {
       const elements = await this.productModel
-        .findOne({ idUser: user.idUser, idProduct }, { __v: 0, _id: 0 })
+        .findOne(
+          {
+            idUser: user.idUser,
+            idProduct,
+          },
+          { __v: 0, _id: 0 },
+        )
         .exec();
       return generateElementResponse('object', elements);
     } catch (err) {
@@ -106,13 +124,20 @@ export class ProductService {
     }
   }
 
-  async remove({ idUser }: User, idProduct: string) {
+  async remove({ idUser, productLimit }: User, idProduct: string) {
     try {
       const element = await this.productModel.findOneAndRemove({
         idUser,
         idProduct,
+        relations: [],
       });
       if (element === null) throw new Error('NOT FOUND PRODUCT');
+      await this.userModel.findOneAndUpdate(
+        {
+          idUser,
+        },
+        { productLimit: productLimit - 1 },
+      );
       return generateSuccessResponse();
     } catch (err) {
       if (err.message === 'NOT FOUND PRODUCT') {
