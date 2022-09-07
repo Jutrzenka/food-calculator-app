@@ -11,6 +11,10 @@ export class Product extends Document {
   idUser: string;
   @Prop({ required: true })
   name: string;
+  calories: number;
+  fat: number;
+  carbohydrates: number;
+  protein: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

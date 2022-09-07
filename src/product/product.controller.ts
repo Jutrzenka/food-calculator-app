@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtUserGuard } from '../auth/authorization-token/guard/jwtUser.guard';
 import { UserObj } from '../Utils/decorator/userobj.decorator';
@@ -23,15 +22,13 @@ export class ProductController {
   @Get()
   @UseGuards(JwtUserGuard)
   findAll(@UserObj() user: User, @Body() { limit, page }: FindAllProductDto) {
-    console.log(user);
-    console.log(limit, page);
     return this.productService.findAll(user, limit, page);
   }
 
   @Post()
   @UseGuards(JwtUserGuard)
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  create(@UserObj() user: User) {
+    return this.productService.create(user);
   }
 
   @Get('/:id')

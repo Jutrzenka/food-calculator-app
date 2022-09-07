@@ -84,7 +84,6 @@ export class AuthService {
 
   async logout(user: User, res: Response) {
     try {
-      console.log(user);
       await this.authModel.findOneAndUpdate(
         { idUser: user.idUser },
         { accessToken: null },
