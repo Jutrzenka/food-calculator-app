@@ -55,7 +55,7 @@ export class ProductService {
       const elements = await this.productModel
         .find(
           { idUser: user.idUser },
-          { __v: 0, _id: 0 },
+          { __v: 0, _id: 0, relations: 0 },
           {
             limit,
             skip: limit * (page - 1),
@@ -83,7 +83,7 @@ export class ProductService {
             idUser: user.idUser,
             idProduct,
           },
-          { __v: 0, _id: 0 },
+          { __v: 0, _id: 0, relations: 0 },
         )
         .exec();
       return generateElementResponse('object', elements);
