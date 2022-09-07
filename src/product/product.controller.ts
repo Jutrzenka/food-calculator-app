@@ -49,9 +49,9 @@ export class ProductController {
     return this.productService.update(user, idProduct, updateProductDto);
   }
 
-  @Delete('/:id')
+  @Delete('/:idProduct')
   @UseGuards(JwtUserGuard)
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  remove(@UserObj() user: User, @Param() { idProduct }: FindOneProductParam) {
+    return this.productService.remove(user, idProduct);
   }
 }

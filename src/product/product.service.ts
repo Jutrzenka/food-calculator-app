@@ -106,7 +106,25 @@ export class ProductService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove({ idUser }: User, idProduct: string) {
+    try {
+      const element = await this.productModel.findOneAndRemove({
+        idUser,
+        idProduct,
+      });
+      if (element === null) throw new Error('NOT FOUND PRODUCT');
+      return generateSuccessResponse();
+    } catch (err) {
+      if (err.message === 'NOT FOUND PRODUCT') {
+        throw new HttpException(
+          'This product is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
