@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { Product, ProductDocument } from './schema/product.schema';
 import {
   generateArrayResponse,
+  generateElementResponse,
   generateSuccessResponse,
 } from '../Utils/function/generateJsonResponse/generateJsonResponse';
 import { User } from '../auth/schema/user.schema';
@@ -34,29 +35,46 @@ export class ProductService {
   }
 
   async findAll(user: User, limit: number, page: number) {
-    const countElements = await this.productModel
-      .find({ idUser: user.idUser })
-      .countDocuments()
-      .exec();
-    const elements = await this.productModel
-      .find(
-        { idUser: user.idUser },
-        { __v: 0, _id: 0 },
-        {
-          limit,
-          skip: limit * (page - 1),
-        },
-      )
-      .exec();
-    return generateArrayResponse(
-      countElements,
-      Math.ceil(countElements / limit),
-      elements,
-    );
+    try {
+      const countElements = await this.productModel
+        .find({ idUser: user.idUser })
+        .countDocuments()
+        .exec();
+      const elements = await this.productModel
+        .find(
+          { idUser: user.idUser },
+          { __v: 0, _id: 0 },
+          {
+            limit,
+            skip: limit * (page - 1),
+          },
+        )
+        .exec();
+      return generateArrayResponse(
+        countElements,
+        Math.ceil(countElements / limit),
+        elements,
+      );
+    } catch (err) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(user: User, idProduct: string) {
+    try {
+      const elements = await this.productModel
+        .findOne({ idUser: user.idUser, idProduct }, { __v: 0, _id: 0 })
+        .exec();
+      return generateElementResponse('object', elements);
+    } catch (err) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {

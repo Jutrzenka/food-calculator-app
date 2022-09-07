@@ -14,6 +14,7 @@ import { JwtUserGuard } from '../auth/authorization-token/guard/jwtUser.guard';
 import { UserObj } from '../Utils/decorator/userobj.decorator';
 import { User } from '../auth/schema/user.schema';
 import { FindAllProductDto } from './dto/findAll-product.dto';
+import { FindOneProductParam } from './dto/findOne-product.param';
 
 @Controller('/product')
 export class ProductController {
@@ -31,10 +32,10 @@ export class ProductController {
     return this.productService.create(user);
   }
 
-  @Get('/:id')
+  @Get('/:idProduct')
   @UseGuards(JwtUserGuard)
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  findOne(@UserObj() user: User, @Param() { idProduct }: FindOneProductParam) {
+    return this.productService.findOne(user, idProduct);
   }
 
   @Patch('/:id')
