@@ -11,9 +11,29 @@ export class Product extends Document {
   idUser: string;
   @Prop({ required: true })
   name: string;
+  @Prop({
+    default(): null {
+      return null;
+    },
+  })
   calories: number;
+  @Prop({
+    default(): null {
+      return null;
+    },
+  })
   fat: number;
+  @Prop({
+    default(): null {
+      return null;
+    },
+  })
   carbohydrates: number;
+  @Prop({
+    default(): null {
+      return null;
+    },
+  })
   protein: number;
 }
 

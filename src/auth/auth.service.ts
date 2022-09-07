@@ -122,6 +122,7 @@ export class AuthService {
         .cookie('session-food-calc', token.accessToken, {
           secure: configuration().server.ssl,
           domain: configuration().server.domain,
+          maxAge: 1000 * 60 * 20,
           httpOnly: true,
         })
         .json(

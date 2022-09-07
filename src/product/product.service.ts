@@ -77,8 +77,33 @@ export class ProductService {
     }
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(
+    { idUser }: User,
+    idProduct: string,
+    { name, calories, fat, carbohydrates, protein }: UpdateProductDto,
+  ) {
+    try {
+      const element = await this.productModel.findOneAndUpdate(
+        {
+          idUser,
+          idProduct,
+        },
+        { name, calories, fat, carbohydrates, protein },
+      );
+      if (element === null) throw new Error('NOT FOUND PRODUCT');
+      return generateSuccessResponse();
+    } catch (err) {
+      if (err.message === 'NOT FOUND PRODUCT') {
+        throw new HttpException(
+          'This product is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   remove(id: number) {
