@@ -1,7 +1,8 @@
-import { IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsNumber, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export class UpdateProductDto {
   @IsString()
+  @MaxLength(256)
   name: string;
   @IsNumber()
   @Max(20000)

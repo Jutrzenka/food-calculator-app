@@ -9,7 +9,7 @@ export class Product extends Document {
   idProduct: string;
   @Prop({ required: true })
   idUser: string;
-  @Prop({ required: true })
+  @Prop({ required: true, maxlength: 256 })
   name: string;
   @Prop({
     required: true,

@@ -1,4 +1,9 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateRecipeDto } from './create-recipe.dto';
+import { IsString, MaxLength } from 'class-validator';
 
-export class UpdateRecipeDto extends PartialType(CreateRecipeDto) {}
+export class UpdateRecipeDto {
+  @IsString()
+  @MaxLength(256)
+  name: string;
+  @IsString()
+  description: string;
+}

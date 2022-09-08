@@ -14,10 +14,10 @@ import { generateUUID } from '../Utils/function/generateUUID';
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectModel(Product.name)
-    private productModel: Model<ProductDocument>,
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
+    @InjectModel(Product.name)
+    private productModel: Model<ProductDocument>,
   ) {}
 
   async create({ idUser, productLimit }: User) {
@@ -46,15 +46,15 @@ export class ProductService {
     }
   }
 
-  async findAll(user: User, limit: number, page: number) {
+  async findAll({ idUser }: User, limit: number, page: number) {
     try {
       const countElements = await this.productModel
-        .find({ idUser: user.idUser })
+        .find({ idUser })
         .countDocuments()
         .exec();
       const elements = await this.productModel
         .find(
-          { idUser: user.idUser },
+          { idUser },
           { __v: 0, _id: 0, relations: 0 },
           {
             limit,
@@ -75,12 +75,12 @@ export class ProductService {
     }
   }
 
-  async findOne(user: User, idProduct: string) {
+  async findOne({ idUser }: User, idProduct: string) {
     try {
       const elements = await this.productModel
         .findOne(
           {
-            idUser: user.idUser,
+            idUser,
             idProduct,
           },
           { __v: 0, _id: 0, relations: 0 },

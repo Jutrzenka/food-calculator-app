@@ -6,37 +6,51 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
-import { CreateRecipeDto } from './dto/create-recipe.dto';
+import { JwtUserGuard } from '../auth/authorization-token/guard/jwtUser.guard';
+import { UserObj } from '../Utils/decorator/userobj.decorator';
+import { User } from '../auth/schema/user.schema';
+import { FindAllRecipeDto } from './dto/findAll-recipe.dto';
+import { FindOneRecipeParam } from './dto/findOne-recipe.param';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 
 @Controller('recipe')
 export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
-  @Post()
-  create(@Body() createRecipeDto: CreateRecipeDto) {
-    return this.recipeService.create(createRecipeDto);
-  }
-
   @Get()
-  findAll() {
-    return this.recipeService.findAll();
+  @UseGuards(JwtUserGuard)
+  findAll(@UserObj() user: User, @Body() { limit, page }: FindAllRecipeDto) {
+    return this.recipeService.findAll(user, limit, page);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.recipeService.findOne(+id);
+  @Post()
+  @UseGuards(JwtUserGuard)
+  create(@UserObj() user: User) {
+    return this.recipeService.create(user);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRecipeDto: UpdateRecipeDto) {
-    return this.recipeService.update(+id, updateRecipeDto);
+  @Get('/:idRecipe')
+  @UseGuards(JwtUserGuard)
+  findOne(@UserObj() user: User, @Param() { idRecipe }: FindOneRecipeParam) {
+    return this.recipeService.findOne(user, idRecipe);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.recipeService.remove(+id);
+  @Patch('/:idRecipe')
+  @UseGuards(JwtUserGuard)
+  update(
+    @UserObj() user: User,
+    @Param() { idRecipe }: FindOneRecipeParam,
+    @Body() updateRecipe: UpdateRecipeDto,
+  ) {
+    return this.recipeService.update(user, idRecipe, updateRecipe);
+  }
+
+  @Delete('/:idRecipe')
+  @UseGuards(JwtUserGuard)
+  remove(@UserObj() user: User, @Param() { idRecipe }: FindOneRecipeParam) {
+    return this.recipeService.remove(user, idRecipe);
   }
 }
