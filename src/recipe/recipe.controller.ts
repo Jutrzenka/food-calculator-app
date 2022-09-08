@@ -15,6 +15,8 @@ import { User } from '../auth/schema/user.schema';
 import { FindAllRecipeDto } from './dto/findAll-recipe.dto';
 import { FindOneRecipeParam } from './dto/findOne-recipe.param';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { AddProductRecipeParam } from './dto/addProduct-recipe.param';
+import { AmountProductRecipeDto } from './dto/amountProduct-recipe.dto';
 
 @Controller('recipe')
 export class RecipeController {
@@ -52,5 +54,20 @@ export class RecipeController {
   @UseGuards(JwtUserGuard)
   remove(@UserObj() user: User, @Param() { idRecipe }: FindOneRecipeParam) {
     return this.recipeService.remove(user, idRecipe);
+  }
+
+  //Added and deleted product in recipe
+
+  @Post('/:idRecipe/:idProduct')
+  @UseGuards(JwtUserGuard)
+  addProductToRecipe(
+    @UserObj() user: User,
+    @Param() { idRecipe, idProduct }: AddProductRecipeParam,
+    @Body() { amount }: AmountProductRecipeDto,
+  ) {
+    return this.recipeService.addProductToRecipe(user, idRecipe, {
+      idProduct,
+      amount,
+    });
   }
 }

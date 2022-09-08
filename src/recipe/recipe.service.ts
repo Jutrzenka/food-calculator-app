@@ -11,6 +11,7 @@ import {
 } from '../Utils/function/generateJsonResponse/generateJsonResponse';
 import { Product, ProductDocument } from '../product/schema/product.schema';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { ProductType } from '../Utils/type/product.type';
 
 @Injectable()
 export class RecipeService {
@@ -116,7 +117,7 @@ export class RecipeService {
     } catch (err) {
       if (err.message === 'NOT FOUND RECIPE') {
         throw new HttpException(
-          'This product is not found',
+          'This recipe is not found',
           HttpStatus.NOT_FOUND,
         );
       }
@@ -143,6 +144,63 @@ export class RecipeService {
       );
       return generateSuccessResponse();
     } catch (err) {
+      if (err.message === 'NOT FOUND RECIPE') {
+        throw new HttpException(
+          'This recipe is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async addProductToRecipe(
+    { idUser }: User,
+    idRecipe: string,
+    product: ProductType,
+  ) {
+    const value = await this.productModel.exists({
+      idUser,
+      idProduct: product.idProduct,
+    });
+    if (value === null) {
+      throw new HttpException(
+        'This product is not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    try {
+      const recipe = await this.recipeModel.findOneAndUpdate(
+        {
+          idUser,
+          idRecipe,
+        },
+        {
+          $addToSet: { products: product },
+        },
+      );
+      if (recipe === null) throw new Error('NOT FOUND RECIPE');
+      const element = await this.productModel.findOneAndUpdate(
+        {
+          idUser,
+          idProduct: product.idProduct,
+        },
+        {
+          $addToSet: { relations: idRecipe },
+        },
+      );
+      if (element === null) throw new Error('NOT FOUND PRODUCT');
+      return generateSuccessResponse();
+    } catch (err) {
+      if (err.message === 'NOT FOUND PRODUCT') {
+        throw new HttpException(
+          'This product is not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
       if (err.message === 'NOT FOUND RECIPE') {
         throw new HttpException(
           'This recipe is not found',
