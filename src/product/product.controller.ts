@@ -15,6 +15,7 @@ import { UserObj } from '../Utils/decorator/userobj.decorator';
 import { User } from '../auth/schema/user.schema';
 import { FindAllProductDto } from './dto/findAll-product.dto';
 import { FindOneProductParam } from './dto/findOne-product.param';
+import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
 @Controller('/product')
 export class ProductController {
@@ -22,7 +23,10 @@ export class ProductController {
 
   @Get()
   @UseGuards(JwtUserGuard)
-  findAll(@UserObj() user: User, @Body() { limit, page }: FindAllProductDto) {
+  findAll(
+    @UserObj() user: User,
+    @Body() { limit, page }: FindAllProductDto,
+  ): Promise<JsonCommunicationType> {
     return this.productService.findAll(user, limit, page);
   }
 
@@ -34,7 +38,10 @@ export class ProductController {
 
   @Get('/:idProduct')
   @UseGuards(JwtUserGuard)
-  findOne(@UserObj() user: User, @Param() { idProduct }: FindOneProductParam) {
+  findOne(
+    @UserObj() user: User,
+    @Param() { idProduct }: FindOneProductParam,
+  ): Promise<JsonCommunicationType> {
     return this.productService.findOne(user, idProduct);
   }
 
@@ -44,13 +51,16 @@ export class ProductController {
     @UserObj() user: User,
     @Param() { idProduct }: FindOneProductParam,
     @Body() updateProductDto: UpdateProductDto,
-  ) {
+  ): Promise<JsonCommunicationType> {
     return this.productService.update(user, idProduct, updateProductDto);
   }
 
   @Delete('/:idProduct')
   @UseGuards(JwtUserGuard)
-  remove(@UserObj() user: User, @Param() { idProduct }: FindOneProductParam) {
+  remove(
+    @UserObj() user: User,
+    @Param() { idProduct }: FindOneProductParam,
+  ): Promise<JsonCommunicationType> {
     return this.productService.remove(user, idProduct);
   }
 }

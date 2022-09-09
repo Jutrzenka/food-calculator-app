@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class AddProductRecipeParam {
+export class ProductInRecipeParam {
   @IsString()
   idRecipe: string;
   @IsString()

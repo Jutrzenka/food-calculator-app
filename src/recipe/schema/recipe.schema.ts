@@ -11,15 +11,15 @@ export class Recipe extends Document {
   idUser: string;
   @Prop({ required: true, maxlength: 256 })
   name: string;
-  @Prop()
-  description: string;
   @Prop({
     required: true,
     default(): [] {
       return [];
     },
   })
-  products: Array<{ idProduct: string; amount: number }>;
+  relations: Array<string>;
+  @Prop()
+  description: string;
 }
 
 export const RecipeSchema = SchemaFactory.createForClass(Recipe);

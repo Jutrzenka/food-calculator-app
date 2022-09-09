@@ -1,10 +1,4 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Response } from 'express';
@@ -17,6 +11,8 @@ import {
   generateElementResponse,
   generateSuccessResponse,
 } from '../Utils/function/generateJsonResponse/generateJsonResponse';
+import { RestStandardError } from '../Utils/class/RestStandardError';
+import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +23,11 @@ export class AuthService {
     private tokenService: UserTokenService,
   ) {}
 
-  async activateAccount(email: string, password: string, registerCode: string) {
+  async activateAccount(
+    email: string,
+    password: string,
+    registerCode: string,
+  ): Promise<JsonCommunicationType> {
     const hashPassword = await encryption(password);
     if (!hashPassword.status) {
       throw new Error(hashPassword.error);
@@ -45,12 +45,19 @@ export class AuthService {
       new: true,
     });
     if (status.modifiedCount === 0) {
-      throw new HttpException('This user is not found', HttpStatus.BAD_REQUEST);
+      throw new RestStandardError(
+        'This user is not found',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return generateSuccessResponse();
   }
 
-  async register(email: string, name: string, surname: string) {
+  async register(
+    email: string,
+    name: string,
+    surname: string,
+  ): Promise<JsonCommunicationType> {
     try {
       await this.authModel.create({
         idUser: generateUUID(),
@@ -62,21 +69,20 @@ export class AuthService {
       });
       return generateSuccessResponse();
     } catch (err) {
-      console.log(err);
       if (err.code === 11000) {
-        throw new HttpException(
+        throw new RestStandardError(
           'This email or login is existed',
           HttpStatus.BAD_REQUEST,
         );
       }
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async logout(user: User, res: Response) {
+  async logout(user: User, res: Response): Promise<JsonCommunicationType> {
     try {
       await this.authModel.findOneAndUpdate(
         { idUser: user.idUser },
@@ -87,23 +93,24 @@ export class AuthService {
         domain: configuration().server.domain,
         httpOnly: true,
       });
-      return res.status(200).json(generateSuccessResponse());
+      res.json(generateSuccessResponse());
     } catch (e) {
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+    return generateSuccessResponse();
   }
 
-  async login(email, password, res) {
+  async login(email, password, res): Promise<JsonCommunicationType> {
     try {
       const user = await this.authModel.findOne({
         email,
       });
       const isUser = await decryption(password, user.password);
       if (!isUser) {
-        throw new HttpException(
+        throw new RestStandardError(
           'This user is not found',
           HttpStatus.BAD_REQUEST,
         );
@@ -126,7 +133,10 @@ export class AuthService {
           }),
         );
     } catch (e) {
-      throw new HttpException('This user is not found', HttpStatus.BAD_REQUEST);
+      throw new RestStandardError(
+        'This user is not found',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

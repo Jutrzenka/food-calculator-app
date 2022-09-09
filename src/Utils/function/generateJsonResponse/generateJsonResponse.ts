@@ -1,4 +1,4 @@
-import { JsonCommunicationType } from 'src/Utils/type/JsonCommunicationType';
+import { JsonCommunicationType } from 'src/Utils/type/JsonCommunication.type';
 
 export const generateSuccessResponse = (): JsonCommunicationType => {
   return {

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../auth/schema/user.schema';
@@ -9,21 +9,19 @@ import {
   generateElementResponse,
   generateSuccessResponse,
 } from '../Utils/function/generateJsonResponse/generateJsonResponse';
-import { Product, ProductDocument } from '../product/schema/product.schema';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
-import { ProductType } from '../Utils/type/product.type';
+import { RestStandardError } from '../Utils/class/RestStandardError';
+import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
 @Injectable()
 export class RecipeService {
   constructor(
     @InjectModel(User.name)
     private userModel: Model<UserDocument>,
-    @InjectModel(Product.name)
-    private productModel: Model<ProductDocument>,
     @InjectModel(Recipe.name)
     private recipeModel: Model<RecipeDocument>,
   ) {}
-  async create({ idUser, recipeLimit }: User) {
+  async create({ idUser, recipeLimit }: User): Promise<JsonCommunicationType> {
     if (recipeLimit < 100) {
       try {
         await this.recipeModel.create({
@@ -40,17 +38,21 @@ export class RecipeService {
         );
         return generateSuccessResponse();
       } catch (err) {
-        throw new HttpException(
+        throw new RestStandardError(
           'Internal server error',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
     } else {
-      throw new HttpException('Too many recipe', HttpStatus.CONFLICT);
+      throw new RestStandardError('Too many recipe', HttpStatus.CONFLICT);
     }
   }
 
-  async findAll({ idUser }: User, limit: number, page: number) {
+  async findAll(
+    { idUser }: User,
+    limit: number,
+    page: number,
+  ): Promise<JsonCommunicationType> {
     try {
       const countElements = await this.recipeModel
         .find({ idUser })
@@ -59,7 +61,7 @@ export class RecipeService {
       const elements = await this.recipeModel
         .find(
           { idUser },
-          { __v: 0, _id: 0 },
+          { __v: 0, _id: 0, relations: 0 },
           {
             limit,
             skip: limit * (page - 1),
@@ -72,14 +74,17 @@ export class RecipeService {
         elements,
       );
     } catch (err) {
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async findOne({ idUser }: User, idRecipe: string) {
+  async findOne(
+    { idUser }: User,
+    idRecipe: string,
+  ): Promise<JsonCommunicationType> {
     try {
       const elements = await this.recipeModel
         .findOne(
@@ -87,12 +92,12 @@ export class RecipeService {
             idUser,
             idRecipe,
           },
-          { __v: 0, _id: 0 },
+          { __v: 0, _id: 0, relations: 0 },
         )
         .exec();
       return generateElementResponse('object', elements);
     } catch (err) {
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -103,7 +108,7 @@ export class RecipeService {
     { idUser }: User,
     idRecipe: string,
     { name, description }: UpdateRecipeDto,
-  ) {
+  ): Promise<JsonCommunicationType> {
     try {
       const element = await this.recipeModel.findOneAndUpdate(
         {
@@ -116,24 +121,27 @@ export class RecipeService {
       return generateSuccessResponse();
     } catch (err) {
       if (err.message === 'NOT FOUND RECIPE') {
-        throw new HttpException(
+        throw new RestStandardError(
           'This recipe is not found',
           HttpStatus.NOT_FOUND,
         );
       }
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async remove({ idUser, recipeLimit }: User, idRecipe: string) {
+  async remove(
+    { idUser, recipeLimit }: User,
+    idRecipe: string,
+  ): Promise<JsonCommunicationType> {
     try {
       const element = await this.recipeModel.findOneAndRemove({
         idUser,
         idRecipe,
-        products: [],
+        relations: [],
       });
       if (element === null) throw new Error('NOT FOUND RECIPE');
       await this.userModel.findOneAndUpdate(
@@ -145,69 +153,12 @@ export class RecipeService {
       return generateSuccessResponse();
     } catch (err) {
       if (err.message === 'NOT FOUND RECIPE') {
-        throw new HttpException(
-          'This recipe is not found',
+        throw new RestStandardError(
+          'This recipe is not found, or recipe is in the relation',
           HttpStatus.NOT_FOUND,
         );
       }
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async addProductToRecipe(
-    { idUser }: User,
-    idRecipe: string,
-    product: ProductType,
-  ) {
-    const value = await this.productModel.exists({
-      idUser,
-      idProduct: product.idProduct,
-    });
-    if (value === null) {
-      throw new HttpException(
-        'This product is not found',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    try {
-      const recipe = await this.recipeModel.findOneAndUpdate(
-        {
-          idUser,
-          idRecipe,
-        },
-        {
-          $addToSet: { products: product },
-        },
-      );
-      if (recipe === null) throw new Error('NOT FOUND RECIPE');
-      const element = await this.productModel.findOneAndUpdate(
-        {
-          idUser,
-          idProduct: product.idProduct,
-        },
-        {
-          $addToSet: { relations: idRecipe },
-        },
-      );
-      if (element === null) throw new Error('NOT FOUND PRODUCT');
-      return generateSuccessResponse();
-    } catch (err) {
-      if (err.message === 'NOT FOUND PRODUCT') {
-        throw new HttpException(
-          'This product is not found',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      if (err.message === 'NOT FOUND RECIPE') {
-        throw new HttpException(
-          'This recipe is not found',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

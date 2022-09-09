@@ -17,24 +17,33 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { ConfirmUserDto } from './dto/confirm-user.dto';
 import { ConfirmUserParam } from './dto/confirm-user.param';
 import { JwtUserGuard } from './authorization-token/guard/jwtUser.guard';
+import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/login')
-  async login(@Body() { email, password }: LoginUserDto, @Res() res: Response) {
-    await this.authService.login(email, password, res);
+  async login(
+    @Body() { email, password }: LoginUserDto,
+    @Res() res: Response,
+  ): Promise<JsonCommunicationType> {
+    return await this.authService.login(email, password, res);
   }
 
   @Post('/logout')
   @UseGuards(JwtUserGuard)
-  async logout(@UserObj() user: User, @Res() res: Response) {
+  async logout(
+    @UserObj() user: User,
+    @Res() res: Response,
+  ): Promise<JsonCommunicationType> {
     return this.authService.logout(user, res);
   }
 
   @Put('/register')
-  async register(@Body() { email, name, surname }: RegisterUserDto) {
+  async register(
+    @Body() { email, name, surname }: RegisterUserDto,
+  ): Promise<JsonCommunicationType> {
     return this.authService.register(email, name, surname);
   }
 
@@ -42,7 +51,7 @@ export class AuthController {
   async confirmAccount(
     @Param() { email, registerCode }: ConfirmUserParam,
     @Body() { password }: ConfirmUserDto,
-  ) {
+  ): Promise<JsonCommunicationType> {
     return await this.authService.activateAccount(
       email,
       password,

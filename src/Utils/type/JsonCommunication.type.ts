@@ -15,8 +15,13 @@ interface ArrayData {
   value: any[]; // Zwrócona tablica
 }
 
+interface ErrorData {
+  code: string; // Kod błędu
+  message: string; // Wiadomość do błędu
+}
+
 export interface JsonCommunicationType {
   success: boolean; // Czy udało się przeprowadzić zapytanie
   typeData: TypeData; // Typ zwróconych danych
-  data: ArrayData | ElementData | null; //Dane
+  data: ArrayData | ElementData | ErrorData | null; //Dane
 }

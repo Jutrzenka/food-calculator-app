@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -10,6 +10,8 @@ import {
 } from '../Utils/function/generateJsonResponse/generateJsonResponse';
 import { User, UserDocument } from '../auth/schema/user.schema';
 import { generateUUID } from '../Utils/function/generateUUID';
+import { RestStandardError } from '../Utils/class/RestStandardError';
+import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
 @Injectable()
 export class ProductService {
@@ -20,7 +22,7 @@ export class ProductService {
     private productModel: Model<ProductDocument>,
   ) {}
 
-  async create({ idUser, productLimit }: User) {
+  async create({ idUser, productLimit }: User): Promise<JsonCommunicationType> {
     if (productLimit < 250) {
       try {
         await this.productModel.create({
@@ -36,17 +38,21 @@ export class ProductService {
         );
         return generateSuccessResponse();
       } catch (err) {
-        throw new HttpException(
+        throw new RestStandardError(
           'Internal server error',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
     } else {
-      throw new HttpException('Too many product', HttpStatus.CONFLICT);
+      throw new RestStandardError('Too many product', HttpStatus.CONFLICT);
     }
   }
 
-  async findAll({ idUser }: User, limit: number, page: number) {
+  async findAll(
+    { idUser }: User,
+    limit: number,
+    page: number,
+  ): Promise<JsonCommunicationType> {
     try {
       const countElements = await this.productModel
         .find({ idUser })
@@ -68,14 +74,17 @@ export class ProductService {
         elements,
       );
     } catch (err) {
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async findOne({ idUser }: User, idProduct: string) {
+  async findOne(
+    { idUser }: User,
+    idProduct: string,
+  ): Promise<JsonCommunicationType> {
     try {
       const elements = await this.productModel
         .findOne(
@@ -88,7 +97,7 @@ export class ProductService {
         .exec();
       return generateElementResponse('object', elements);
     } catch (err) {
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -99,7 +108,7 @@ export class ProductService {
     { idUser }: User,
     idProduct: string,
     { name, calories, fat, carbohydrates, protein }: UpdateProductDto,
-  ) {
+  ): Promise<JsonCommunicationType> {
     try {
       const element = await this.productModel.findOneAndUpdate(
         {
@@ -112,19 +121,22 @@ export class ProductService {
       return generateSuccessResponse();
     } catch (err) {
       if (err.message === 'NOT FOUND PRODUCT') {
-        throw new HttpException(
+        throw new RestStandardError(
           'This product is not found',
           HttpStatus.NOT_FOUND,
         );
       }
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async remove({ idUser, productLimit }: User, idProduct: string) {
+  async remove(
+    { idUser, productLimit }: User,
+    idProduct: string,
+  ): Promise<JsonCommunicationType> {
     try {
       const element = await this.productModel.findOneAndRemove({
         idUser,
@@ -141,12 +153,12 @@ export class ProductService {
       return generateSuccessResponse();
     } catch (err) {
       if (err.message === 'NOT FOUND PRODUCT') {
-        throw new HttpException(
-          'This product is not found',
+        throw new RestStandardError(
+          'This product is not found, or product is in the relation',
           HttpStatus.NOT_FOUND,
         );
       }
-      throw new HttpException(
+      throw new RestStandardError(
         'Internal server error',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

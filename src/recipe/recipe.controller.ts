@@ -15,8 +15,7 @@ import { User } from '../auth/schema/user.schema';
 import { FindAllRecipeDto } from './dto/findAll-recipe.dto';
 import { FindOneRecipeParam } from './dto/findOne-recipe.param';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
-import { AddProductRecipeParam } from './dto/addProduct-recipe.param';
-import { AmountProductRecipeDto } from './dto/amountProduct-recipe.dto';
+import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
 @Controller('recipe')
 export class RecipeController {
@@ -24,19 +23,25 @@ export class RecipeController {
 
   @Get()
   @UseGuards(JwtUserGuard)
-  findAll(@UserObj() user: User, @Body() { limit, page }: FindAllRecipeDto) {
+  findAll(
+    @UserObj() user: User,
+    @Body() { limit, page }: FindAllRecipeDto,
+  ): Promise<JsonCommunicationType> {
     return this.recipeService.findAll(user, limit, page);
   }
 
   @Post()
   @UseGuards(JwtUserGuard)
-  create(@UserObj() user: User) {
+  create(@UserObj() user: User): Promise<JsonCommunicationType> {
     return this.recipeService.create(user);
   }
 
   @Get('/:idRecipe')
   @UseGuards(JwtUserGuard)
-  findOne(@UserObj() user: User, @Param() { idRecipe }: FindOneRecipeParam) {
+  findOne(
+    @UserObj() user: User,
+    @Param() { idRecipe }: FindOneRecipeParam,
+  ): Promise<JsonCommunicationType> {
     return this.recipeService.findOne(user, idRecipe);
   }
 
@@ -46,28 +51,16 @@ export class RecipeController {
     @UserObj() user: User,
     @Param() { idRecipe }: FindOneRecipeParam,
     @Body() updateRecipe: UpdateRecipeDto,
-  ) {
+  ): Promise<JsonCommunicationType> {
     return this.recipeService.update(user, idRecipe, updateRecipe);
   }
 
   @Delete('/:idRecipe')
   @UseGuards(JwtUserGuard)
-  remove(@UserObj() user: User, @Param() { idRecipe }: FindOneRecipeParam) {
-    return this.recipeService.remove(user, idRecipe);
-  }
-
-  //Added and deleted product in recipe
-
-  @Post('/:idRecipe/:idProduct')
-  @UseGuards(JwtUserGuard)
-  addProductToRecipe(
+  remove(
     @UserObj() user: User,
-    @Param() { idRecipe, idProduct }: AddProductRecipeParam,
-    @Body() { amount }: AmountProductRecipeDto,
-  ) {
-    return this.recipeService.addProductToRecipe(user, idRecipe, {
-      idProduct,
-      amount,
-    });
+    @Param() { idRecipe }: FindOneRecipeParam,
+  ): Promise<JsonCommunicationType> {
+    return this.recipeService.remove(user, idRecipe);
   }
 }
