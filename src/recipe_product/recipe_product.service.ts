@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../auth/schema/user.schema';
 import { Recipe, RecipeDocument } from '../recipe/schema/recipe.schema';
-import { generateSuccessResponse } from '../Utils/function/generateJsonResponse/generateJsonResponse';
+import {
+  generateArrayResponse,
+  generateSuccessResponse,
+} from '../Utils/function/generateJsonResponse/generateJsonResponse';
 import { Product, ProductDocument } from '../product/schema/product.schema';
 import { ProductType } from '../Utils/type/product.type';
 import {
@@ -26,6 +29,63 @@ export class Recipe_productService {
     @InjectModel(Recipe_Product.name)
     private relationModel: Model<Recipe_ProductDocument>,
   ) {}
+
+  async getProductToRecipe(
+    { idUser }: User,
+    idRecipe: string,
+  ): Promise<JsonCommunicationType> {
+    const recipeIsExist = await this.recipeModel.exists({
+      idUser,
+      idRecipe,
+    });
+    if (recipeIsExist === null) {
+      throw new RestStandardError(
+        'This recipe is not exist',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const relations = await this.relationModel.find(
+      {
+        idUser,
+        idRecipe,
+      },
+      {
+        _id: 0,
+        __v: 0,
+      },
+      { lean: true },
+    );
+    const el = [];
+    for (const recursionRelation of relations) {
+      el.push(recursionRelation.idRelation);
+    }
+    const elements = await this.productModel.find(
+      {
+        idUser,
+        relations: { $in: el },
+      },
+      {
+        _id: 0,
+        __v: 0,
+        relations: 0,
+      },
+      { lean: true },
+    );
+    const recursionElements = [];
+    for (const value of elements) {
+      for (const rel of relations) {
+        if (value.idProduct === rel.idProduct) {
+          recursionElements.push({ ...value, amount: rel.amount });
+        }
+      }
+    }
+    return generateArrayResponse(
+      recursionElements.length,
+      1,
+      recursionElements,
+    );
+  }
+
   async addProductToRecipe(
     { idUser }: User,
     idRecipe: string,
@@ -34,7 +94,6 @@ export class Recipe_productService {
     const recipeIsExist = await this.recipeModel.exists({
       idUser,
       idRecipe,
-      idProduct,
     });
     if (recipeIsExist === null) {
       throw new RestStandardError(

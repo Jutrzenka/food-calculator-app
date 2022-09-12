@@ -6,3 +6,8 @@ export class ProductInRecipeParam {
   @IsString()
   idProduct: string;
 }
+
+export class RecipeInRelationParam {
+  @IsString()
+  idRecipe: string;
+}
