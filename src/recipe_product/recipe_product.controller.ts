@@ -18,7 +18,7 @@ import {
 import { AmountProductRecipeDto } from './dto/amountProduct-recipe.dto';
 import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
-@Controller('/relation')
+@Controller('/api/relation')
 export class Recipe_productController {
   constructor(private readonly relationService: Recipe_productService) {}
 

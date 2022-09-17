@@ -18,7 +18,7 @@ import { FindAllProductDto } from './dto/findAll-product.dto';
 import { FindOneProductParam } from './dto/findOne-product.param';
 import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
-@Controller('/product')
+@Controller('/api/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 

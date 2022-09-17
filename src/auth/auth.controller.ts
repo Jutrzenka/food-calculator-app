@@ -19,7 +19,7 @@ import { ConfirmUserParam } from './dto/confirm-user.param';
 import { JwtUserGuard } from './authorization-token/guard/jwtUser.guard';
 import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
-@Controller('/auth')
+@Controller('/api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

@@ -18,7 +18,7 @@ import { FindOneRecipeParam } from './dto/findOne-recipe.param';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 
-@Controller('recipe')
+@Controller('/api/recipe')
 export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
