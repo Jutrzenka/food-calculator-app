@@ -6,6 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import configuration from './Utils/config/configuration';
 import { Recipe_productModule } from './recipe_product/recipe_product.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -17,6 +19,9 @@ import { Recipe_productModule } from './recipe_product/recipe_product.module';
     RecipeModule,
     Recipe_productModule,
     AuthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '/public/build'),
+    }),
   ],
   controllers: [],
   providers: [],
