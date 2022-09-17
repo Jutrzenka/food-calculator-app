@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,7 +22,7 @@ import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Get()
+  @Post()
   @UseGuards(JwtUserGuard)
   findAll(
     @UserObj() user: User,
@@ -30,7 +31,7 @@ export class ProductController {
     return this.productService.findAll(user, limit, page);
   }
 
-  @Post()
+  @Put()
   @UseGuards(JwtUserGuard)
   create(@UserObj() user: User) {
     return this.productService.create(user);

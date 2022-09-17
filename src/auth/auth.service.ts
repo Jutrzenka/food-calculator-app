@@ -89,8 +89,6 @@ export class AuthService {
         { accessToken: null },
       );
       res.clearCookie('session-food-calc', {
-        secure: configuration().server.ssl,
-        domain: configuration().server.domain,
         httpOnly: true,
       });
       res.json(generateSuccessResponse());
@@ -121,8 +119,9 @@ export class AuthService {
       return res
         .status(200)
         .cookie('session-food-calc', token.accessToken, {
-          secure: configuration().server.ssl,
+          secure: configuration().server.secure,
           domain: configuration().server.domain,
+          sameSite: 'none',
           maxAge: 1000 * 60 * 20,
           httpOnly: true,
         })

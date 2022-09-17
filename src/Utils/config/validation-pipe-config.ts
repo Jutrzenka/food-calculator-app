@@ -1,5 +1,5 @@
-import { ValidationPipe } from '@nestjs/common';
-import configuration from './configuration';
+import { HttpStatus, ValidationPipe } from '@nestjs/common';
+import { RestStandardError } from '../class/RestStandardError';
 
 export const validationPipeConfig = new ValidationPipe({
   skipUndefinedProperties: false,
@@ -7,6 +7,9 @@ export const validationPipeConfig = new ValidationPipe({
   skipMissingProperties: false,
   stopAtFirstError: true,
   whitelist: true,
-  enableDebugMessages: !configuration().server.isDeployment,
-  disableErrorMessages: configuration().server.isDeployment,
+  enableDebugMessages: true,
+  disableErrorMessages: true,
+  exceptionFactory: () => {
+    return new RestStandardError('Bad request', HttpStatus.BAD_REQUEST);
+  },
 });

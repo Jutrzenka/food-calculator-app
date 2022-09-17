@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
 import { JwtUserGuard } from '../auth/authorization-token/guard/jwtUser.guard';
@@ -21,7 +22,7 @@ import { JsonCommunicationType } from '../Utils/type/JsonCommunication.type';
 export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
-  @Get()
+  @Post()
   @UseGuards(JwtUserGuard)
   findAll(
     @UserObj() user: User,
@@ -30,7 +31,7 @@ export class RecipeController {
     return this.recipeService.findAll(user, limit, page);
   }
 
-  @Post()
+  @Put()
   @UseGuards(JwtUserGuard)
   create(@UserObj() user: User): Promise<JsonCommunicationType> {
     return this.recipeService.create(user);
