@@ -2,7 +2,7 @@ import { IsString, MaxLength } from 'class-validator';
 
 export class UpdateRecipeDto {
   @IsString()
-  @MaxLength(256)
+  @MaxLength(10)
   name: string;
   @IsString()
   description: string;

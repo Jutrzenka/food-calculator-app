@@ -24,7 +24,7 @@ export class RecipeService {
   async create({ idUser, recipeLimit }: User): Promise<JsonCommunicationType> {
     if (recipeLimit < 100) {
       try {
-        await this.recipeModel.create({
+        const { idRecipe, name, description } = await this.recipeModel.create({
           idUser,
           idRecipe: generateUUID(),
           name: 'Nowy przepis',
@@ -36,7 +36,12 @@ export class RecipeService {
           },
           { recipeLimit: recipeLimit + 1 },
         );
-        return generateSuccessResponse();
+        return generateElementResponse('object', {
+          idRecipe,
+          idUser,
+          name,
+          description,
+        });
       } catch (err) {
         throw new RestStandardError(
           'Internal server error',

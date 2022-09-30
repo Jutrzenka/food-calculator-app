@@ -33,7 +33,7 @@ export class ProductController {
 
   @Put()
   @UseGuards(JwtUserGuard)
-  create(@UserObj() user: User) {
+  create(@UserObj() user: User): Promise<JsonCommunicationType> {
     return this.productService.create(user);
   }
 

@@ -25,7 +25,7 @@ export class ProductService {
   async create({ idUser, productLimit }: User): Promise<JsonCommunicationType> {
     if (productLimit < 250) {
       try {
-        await this.productModel.create({
+        const { idProduct, name } = await this.productModel.create({
           idUser,
           idProduct: generateUUID(),
           name: 'Nowy produkt',
@@ -36,7 +36,11 @@ export class ProductService {
           },
           { productLimit: productLimit + 1 },
         );
-        return generateSuccessResponse();
+        return generateElementResponse('object', {
+          idProduct,
+          idUser,
+          name,
+        });
       } catch (err) {
         throw new RestStandardError(
           'Internal server error',

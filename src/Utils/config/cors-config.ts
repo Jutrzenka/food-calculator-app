@@ -7,7 +7,7 @@ const whitelistAddress = [
   `${ssl ? 'https://' : 'http://'}${domain}:${port}`,
   'http://localhost:5173',
 ];
-const whitelistMethod = [`GET`, 'PUT', 'POST', 'PATCH'];
+const whitelistMethod = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
 export const corsConfig: CorsOptions = {
   origin: whitelistAddress,
